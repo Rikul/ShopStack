@@ -1,11 +1,13 @@
-from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models import Q, Sum
-from .models import Payment
-from orders.models import Order
+from django.shortcuts import get_object_or_404, redirect, render
 
-@login_required
+from .forms import AdminPaymentForm
+from .models import Payment
+
+
+@staff_member_required
 def admin_payments(request):
     """Admin view for managing all payments"""
     payments = Payment.objects.select_related('order__user').order_by('-created_at')
@@ -36,7 +38,8 @@ def admin_payments(request):
     }
     return render(request, 'payments/admin_payments.html', context)
 
-@login_required
+
+@staff_member_required
 def admin_payment_detail(request, payment_id):
     """Admin view for payment details"""
     payment = get_object_or_404(Payment, payment_id=payment_id)
@@ -55,21 +58,16 @@ def admin_payment_detail(request, payment_id):
     }
     return render(request, 'payments/admin_payment_detail.html', context)
 
-def process_payment(request, order_id):
+
+@staff_member_required
+def admin_payment_create(request):
     if request.method == 'POST':
-        order = get_object_or_404(Order, order_id=order_id)
-        payment_method = request.POST.get('payment_method')
-        amount = order.total_amount
-        
-        # Create a new payment record
-        Payment.objects.create(
-            order=order,
-            payment_method=payment_method,
-            amount=amount,
-            status='pending'
-        )
-        
-        messages.success(request, 'Payment processed successfully.')
-        return redirect('checkout')
-    
-    return render(request, 'payments/payment_form.html', {'order_id': order_id})
+        form = AdminPaymentForm(request.POST)
+        if form.is_valid():
+            payment = form.save()
+            messages.success(request, 'Payment recorded successfully.')
+            return redirect('admin_payment_detail', payment_id=payment.payment_id)
+    else:
+        form = AdminPaymentForm()
+
+    return render(request, 'payments/admin_payment_create.html', {'form': form})
