@@ -1,6 +1,9 @@
+import csv
+
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models import Q, Sum
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .forms import AdminPaymentForm
@@ -37,6 +40,55 @@ def admin_payments(request):
         'payment_statuses': Payment.objects.values_list('status', flat=True).distinct(),
     }
     return render(request, 'payments/admin_payments.html', context)
+
+
+@staff_member_required
+def admin_payments_export(request):
+    payments = Payment.objects.select_related('order__user').order_by('-created_at')
+
+    status_filter = request.GET.get('status')
+    if status_filter:
+        payments = payments.filter(status=status_filter)
+
+    search_query = request.GET.get('search')
+    if search_query:
+        payments = payments.filter(
+            Q(payment_id__icontains=search_query)
+            | Q(order__order_id__icontains=search_query)
+            | Q(order__user__username__icontains=search_query)
+        )
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="payments.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow([
+        'Payment ID',
+        'Order ID',
+        'Customer',
+        'Email',
+        'Status',
+        'Amount',
+        'Method',
+        'Created At',
+    ])
+
+    for payment in payments:
+        order = payment.order
+        writer.writerow(
+            [
+                payment.payment_id,
+                order.order_id if order else '',
+                order.user.get_full_name() if order and order.user.get_full_name() else (order.user.username if order else ''),
+                order.user.email if order else '',
+                payment.get_status_display(),
+                payment.amount,
+                payment.payment_method,
+                payment.created_at.isoformat(),
+            ]
+        )
+
+    return response
 
 
 @staff_member_required

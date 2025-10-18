@@ -18,9 +18,10 @@
                 <button class="btn btn-outline-primary" onclick="window.print()">
                     <i class="fas fa-print mr-2"></i>Print Report
                 </button>
-                <button class="btn btn-outline-success">
+                <a class="btn btn-outline-success"
+                   href="{% url 'admin_orders_export' %}{% if request.GET.urlencode %}?{{ request.GET.urlencode }}{% endif %}">
                     <i class="fas fa-download mr-2"></i>Export CSV
-                </button>
+                </a>
             </div>
         </div>
     </div>

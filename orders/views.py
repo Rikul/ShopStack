@@ -1,8 +1,10 @@
+import csv
 from decimal import Decimal
 
 from django.contrib import messages
 from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models import Q
+from django.http import HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
 
 from .forms import OrderForm, OrderItemFormSet
@@ -35,6 +37,54 @@ def admin_orders(request):
         'order_statuses': Order.objects.values_list('status', flat=True).distinct(),
     }
     return render(request, 'orders/admin_orders.html', context)
+
+
+@staff_member_required
+def admin_orders_export(request):
+    """Export orders to CSV using the same filters as the list view."""
+
+    orders = Order.objects.select_related('user').prefetch_related('items__product').order_by('-created_at')
+
+    status_filter = request.GET.get('status')
+    if status_filter:
+        orders = orders.filter(status=status_filter)
+
+    search_query = request.GET.get('search')
+    if search_query:
+        orders = orders.filter(
+            Q(order_id__icontains=search_query)
+            | Q(user__username__icontains=search_query)
+            | Q(user__email__icontains=search_query)
+        )
+
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = 'attachment; filename="orders.csv"'
+
+    writer = csv.writer(response)
+    writer.writerow([
+        'Order ID',
+        'Customer',
+        'Email',
+        'Status',
+        'Total Amount',
+        'Created At',
+        'Item Count',
+    ])
+
+    for order in orders:
+        writer.writerow(
+            [
+                order.order_id,
+                order.user.get_full_name() or order.user.username,
+                order.user.email,
+                order.get_status_display(),
+                order.total_amount,
+                order.created_at.isoformat(),
+                order.items.count(),
+            ]
+        )
+
+    return response
 
 @staff_member_required
 def admin_order_detail(request, order_id):

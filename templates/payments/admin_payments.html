@@ -325,7 +325,13 @@ function updatePaymentStatus(paymentId, status) {
 }
 
 function exportData(format) {
-    alert(`Export as ${format.toUpperCase()} - Feature coming soon!`);
+    if (format === 'csv') {
+        const query = window.location.search;
+        const url = '{% url "admin_payments_export" %}' + (query ? query : '');
+        window.location.href = url;
+    } else {
+        alert(`Export as ${format.toUpperCase()} - Feature coming soon!`);
+    }
     $('#exportModal').modal('hide');
 }
 </script>
