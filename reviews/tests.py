@@ -1,7 +1,7 @@
 from django.test import TestCase
 from .models import Review
 from django.contrib.auth import get_user_model
-from products.models import Product
+from products.models import Category, Product
 
 User = get_user_model()
 
@@ -13,11 +13,16 @@ class ReviewModelTest(TestCase):
             email='testuser@example.com',
             password='testpassword'
         )
+        self.category = Category.objects.create(
+            name='Home Goods',
+            description='Household products'
+        )
         self.product = Product.objects.create(
             name='Test Product',
             description='Test Description',
             price=10.00,
-            stock_quantity=100
+            stock_quantity=100,
+            category=self.category
         )
         self.review = Review.objects.create(
             user=self.user,
@@ -33,4 +38,7 @@ class ReviewModelTest(TestCase):
         self.assertEqual(self.review.comment, 'Great product!')
 
     def test_review_str(self):
-        self.assertEqual(str(self.review), 'Great product!')
+        self.assertEqual(
+            str(self.review),
+            f'Review {self.review.review_id} by {self.review.user.username} for {self.review.product.name}'
+        )

@@ -23,18 +23,26 @@ class UserViewsTests(TestCase):
             email='testuser@example.com',
             password='testpassword'
         )
+        self.user.is_staff = True
+        self.user.save()
 
     def test_login_view(self):
         response = self.client.post(reverse('login'), {
             'username': 'testuser',
             'password': 'testpassword'
         })
-        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.status_code, 302)
+        self.assertEqual(response.url, reverse('dashboard:dashboard'))
 
-    def test_register_view(self):
-        response = self.client.post(reverse('register'), {
-            'username': 'newuser',
-            'email': 'newuser@example.com',
-            'password': 'newpassword'
+    def test_login_rejects_non_staff_user(self):
+        User.objects.create_user(
+            username='regularuser',
+            email='regular@example.com',
+            password='regularpassword'
+        )
+        response = self.client.post(reverse('login'), {
+            'username': 'regularuser',
+            'password': 'regularpassword'
         })
-        self.assertEqual(response.status_code, 302)  # Redirect after successful registration
+        self.assertEqual(response.status_code, 200)
+        self.assertContains(response, 'Access is restricted to staff members')

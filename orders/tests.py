@@ -1,6 +1,6 @@
 from django.test import TestCase
 from .models import Order, OrderItem
-from products.models import Product
+from products.models import Category, Product
 from accounts.models import User
 
 class OrderModelTest(TestCase):
@@ -11,11 +11,16 @@ class OrderModelTest(TestCase):
             email='testuser@example.com',
             password='testpassword'
         )
+        self.category = Category.objects.create(
+            name='Apparel',
+            description='Clothing and accessories'
+        )
         self.product = Product.objects.create(
             name='Test Product',
             description='Test Description',
             price=10.00,
-            stock_quantity=100
+            stock_quantity=100,
+            category=self.category
         )
         self.order = Order.objects.create(
             user=self.user,
