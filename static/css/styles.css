@@ -1,0 +1,265 @@
+/* Custom styles for ShopStack Dashboard */
+
+/* Base styles */
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    margin: 0;
+    padding: 0;
+    background-color: #f8f9fc;
+}
+
+/* Dashboard specific styles */
+.dashboard-header {
+    border-bottom: 2px solid #e3e6f0;
+    padding-bottom: 1rem;
+}
+
+/* Card enhancements */
+.card {
+    border: none;
+    border-radius: 0.35rem;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15) !important;
+    margin-bottom: 1.5rem;
+    padding: 0;
+}
+
+.card-header {
+    background-color: #f8f9fc;
+    border-bottom: 1px solid #e3e6f0;
+    padding: 0.75rem 1.25rem;
+}
+
+.card-body {
+    padding: 1.25rem;
+}
+
+.card img {
+    max-width: 100%;
+    border-radius: 5px;
+}
+
+/* Border left cards for metrics */
+.border-left-primary {
+    border-left: 0.25rem solid #4e73df !important;
+}
+
+.border-left-success {
+    border-left: 0.25rem solid #1cc88a !important;
+}
+
+.border-left-info {
+    border-left: 0.25rem solid #36b9cc !important;
+}
+
+.border-left-warning {
+    border-left: 0.25rem solid #f6c23e !important;
+}
+
+/* Icon circles */
+.icon-circle {
+    height: 2.5rem;
+    width: 2.5rem;
+    border-radius: 100%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Text utilities */
+.text-xs {
+    font-size: 0.7rem;
+}
+
+.text-gray-300 {
+    color: #dddfeb !important;
+}
+
+.text-gray-800 {
+    color: #5a5c69 !important;
+}
+
+/* Navigation enhancements */
+.navbar {
+    background-color: #4e73df !important;
+    padding: 1rem;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+}
+
+.navbar-brand {
+    font-weight: bold;
+    font-size: 1.5rem;
+    color: white !important;
+}
+
+.nav-link {
+    font-weight: 500;
+    color: rgba(255, 255, 255, 0.8) !important;
+}
+
+.nav-link:hover {
+    color: #fff !important;
+    transition: color 0.15s ease-in-out;
+}
+
+/* Container adjustments */
+.container {
+    max-width: 1200px;
+    margin: auto;
+    padding: 2rem;
+}
+
+.container-fluid {
+    padding-left: 1.5rem;
+    padding-right: 1.5rem;
+}
+
+/* Table enhancements */
+.table thead th {
+    background-color: #f8f9fc;
+    border-color: #e3e6f0;
+    font-weight: 600;
+    color: #5a5c69;
+}
+
+.table td {
+    border-color: #e3e6f0;
+}
+
+/* Progress bars */
+.progress {
+    height: 0.5rem;
+    border-radius: 0.35rem;
+}
+
+/* Badge enhancements */
+.badge {
+    font-size: 0.75rem;
+}
+
+/* Chart containers */
+.chart-area {
+    position: relative;
+    height: 20rem;
+    width: 100%;
+}
+
+/* Alert enhancements */
+.alert {
+    border: none;
+    border-radius: 0.35rem;
+}
+
+/* Footer */
+footer {
+    border-top: 1px solid #e3e6f0;
+    margin-top: 3rem;
+    background-color: #f8f9fc !important;
+}
+
+.footer {
+    background-color: #f8f9fc;
+    text-align: center;
+    padding: 1rem;
+    position: relative;
+    bottom: 0;
+    width: 100%;
+}
+
+/* Button enhancements */
+.btn {
+    border-radius: 0.35rem;
+    font-weight: 500;
+}
+
+.btn-outline-primary:hover {
+    background-color: #4e73df;
+    border-color: #4e73df;
+}
+
+/* Dropdown enhancements */
+.dropdown-menu {
+    border: none;
+    box-shadow: 0 0.15rem 1.75rem 0 rgba(58, 59, 69, 0.15);
+    border-radius: 0.35rem;
+}
+
+.dropdown-item {
+    font-size: 0.875rem;
+}
+
+.dropdown-item:hover {
+    background-color: #f8f9fc;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .dashboard-header h1 {
+        font-size: 1.5rem;
+    }
+    
+    .card-body {
+        padding: 1rem;
+    }
+    
+    .chart-area {
+        height: 15rem;
+    }
+}
+
+/* Loading states */
+.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Custom scrollbar for webkit browsers */
+::-webkit-scrollbar {
+    width: 0.5rem;
+}
+
+::-webkit-scrollbar-track {
+    background: #f1f1f1;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #c1c1c1;
+    border-radius: 0.25rem;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #a8a8a8;
+}
+
+/* Animation for cards */
+.card {
+    transition: transform 0.15s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+}
+
+/* Status indicators */
+.status-indicator {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    display: inline-block;
+    margin-right: 0.5rem;
+}
+
+.status-success {
+    background-color: #1cc88a;
+}
+
+.status-warning {
+    background-color: #f6c23e;
+}
+
+.status-danger {
+    background-color: #e74a3b;
+}
+
+.status-info {
+    background-color: #36b9cc;
+}

@@ -1,0 +1,329 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Payment Management - ShopStack Admin{% endblock %}
+
+{% block extra_css %}
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.25/css/dataTables.bootstrap4.min.css">
+{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="fas fa-credit-card mr-2"></i>Payment Management
+        </h1>
+    </div>
+
+    <!-- Summary Cards -->
+    <div class="row mb-4">
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-success shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-success text-uppercase mb-1">
+                                Total Payments
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                ${{ total_payments|floatformat:2 }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-dollar-sign fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-info shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-info text-uppercase mb-1">
+                                Total Transactions
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ payments.count }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-receipt fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-warning shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-warning text-uppercase mb-1">
+                                Pending Payments
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ payments|length }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-clock fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-xl-3 col-md-6 mb-4">
+            <div class="card border-left-danger shadow h-100 py-2">
+                <div class="card-body">
+                    <div class="row no-gutters align-items-center">
+                        <div class="col mr-2">
+                            <div class="text-xs font-weight-bold text-danger text-uppercase mb-1">
+                                Failed Payments
+                            </div>
+                            <div class="h5 mb-0 font-weight-bold text-gray-800">
+                                {{ payments|length }}
+                            </div>
+                        </div>
+                        <div class="col-auto">
+                            <i class="fas fa-exclamation-triangle fa-2x text-gray-300"></i>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-filter mr-2"></i>Filter Payments
+            </h6>
+        </div>
+        <div class="card-body">
+            <form method="get" class="row">
+                <div class="col-md-4">
+                    <label for="status">Payment Status:</label>
+                    <select name="status" id="status" class="form-control">
+                        <option value="">All Statuses</option>
+                        <option value="pending" {% if status_filter == 'pending' %}selected{% endif %}>Pending</option>
+                        <option value="completed" {% if status_filter == 'completed' %}selected{% endif %}>Completed</option>
+                        <option value="failed" {% if status_filter == 'failed' %}selected{% endif %}>Failed</option>
+                        <option value="refunded" {% if status_filter == 'refunded' %}selected{% endif %}>Refunded</option>
+                    </select>
+                </div>
+                <div class="col-md-4">
+                    <label for="search">Search:</label>
+                    <input type="text" name="search" id="search" class="form-control" 
+                           placeholder="Payment ID, Order ID, or Username"
+                           value="{{ search_query|default:'' }}">
+                </div>
+                <div class="col-md-4 d-flex align-items-end">
+                    <button type="submit" class="btn btn-primary mr-2">
+                        <i class="fas fa-search mr-1"></i>Filter
+                    </button>
+                    <a href="{% url 'admin_payments' %}" class="btn btn-secondary">
+                        <i class="fas fa-undo mr-1"></i>Clear
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Payments Table -->
+    <div class="card shadow mb-4">
+        <div class="card-header py-3 d-flex justify-content-between align-items-center">
+            <h6 class="m-0 font-weight-bold text-primary">
+                <i class="fas fa-list mr-2"></i>All Payments
+            </h6>
+            <button class="btn btn-success btn-sm" data-toggle="modal" data-target="#exportModal">
+                <i class="fas fa-download mr-1"></i>Export Data
+            </button>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-bordered" id="paymentsTable" width="100%" cellspacing="0">
+                    <thead>
+                        <tr>
+                            <th>Payment ID</th>
+                            <th>Order ID</th>
+                            <th>Customer</th>
+                            <th>Amount</th>
+                            <th>Method</th>
+                            <th>Status</th>
+                            <th>Date</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for payment in payments %}
+                        <tr>
+                            <td>
+                                <span class="font-weight-bold">#{{ payment.payment_id }}</span>
+                            </td>
+                            <td>
+                                <a href="{% url 'admin_order_detail' payment.order.order_id %}" 
+                                   class="text-primary">
+                                    #{{ payment.order.order_id }}
+                                </a>
+                            </td>
+                            <td>
+                                <div class="d-flex align-items-center">
+                                    <div class="avatar-sm bg-primary rounded-circle d-flex align-items-center justify-content-center mr-2">
+                                        <span class="text-white text-xs font-weight-bold">
+                                            {{ payment.order.user.username|first|upper }}
+                                        </span>
+                                    </div>
+                                    <span>{{ payment.order.user.username }}</span>
+                                </div>
+                            </td>
+                            <td>
+                                <span class="font-weight-bold text-success">
+                                    ${{ payment.amount|floatformat:2 }}
+                                </span>
+                            </td>
+                            <td>
+                                <span class="badge badge-info">
+                                    {{ payment.payment_method|title }}
+                                </span>
+                            </td>
+                            <td>
+                                {% if payment.status == 'completed' %}
+                                    <span class="badge badge-success">Completed</span>
+                                {% elif payment.status == 'pending' %}
+                                    <span class="badge badge-warning">Pending</span>
+                                {% elif payment.status == 'failed' %}
+                                    <span class="badge badge-danger">Failed</span>
+                                {% elif payment.status == 'refunded' %}
+                                    <span class="badge badge-secondary">Refunded</span>
+                                {% else %}
+                                    <span class="badge badge-light">{{ payment.status|title }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <small class="text-muted">
+                                    {{ payment.created_at|date:"M d, Y" }}<br>
+                                    {{ payment.created_at|time:"H:i" }}
+                                </small>
+                            </td>
+                            <td>
+                                <div class="btn-group" role="group">
+                                    <a href="{% url 'admin_payment_detail' payment.payment_id %}" 
+                                       class="btn btn-sm btn-outline-primary" title="View Details">
+                                        <i class="fas fa-eye"></i>
+                                    </a>
+                                    <button class="btn btn-sm btn-outline-warning" 
+                                            onclick="updatePaymentStatus('{{ payment.payment_id }}', 'pending')"
+                                            title="Mark as Pending">
+                                        <i class="fas fa-clock"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-success" 
+                                            onclick="updatePaymentStatus('{{ payment.payment_id }}', 'completed')"
+                                            title="Mark as Completed">
+                                        <i class="fas fa-check"></i>
+                                    </button>
+                                    <button class="btn btn-sm btn-outline-danger" 
+                                            onclick="updatePaymentStatus('{{ payment.payment_id }}', 'failed')"
+                                            title="Mark as Failed">
+                                        <i class="fas fa-times"></i>
+                                    </button>
+                                </div>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8" class="text-center text-muted py-4">
+                                <i class="fas fa-inbox fa-3x mb-3"></i><br>
+                                No payments found matching your criteria.
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Export Modal -->
+<div class="modal fade" id="exportModal" tabindex="-1" role="dialog">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Export Payment Data</h5>
+                <button type="button" class="close" data-dismiss="modal">
+                    <span>&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Choose export format:</p>
+                <div class="btn-group-vertical w-100">
+                    <button class="btn btn-outline-success mb-2" onclick="exportData('csv')">
+                        <i class="fas fa-file-csv mr-2"></i>Export as CSV
+                    </button>
+                    <button class="btn btn-outline-info mb-2" onclick="exportData('excel')">
+                        <i class="fas fa-file-excel mr-2"></i>Export as Excel
+                    </button>
+                    <button class="btn btn-outline-danger" onclick="exportData('pdf')">
+                        <i class="fas fa-file-pdf mr-2"></i>Export as PDF
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.datatables.net/1.10.25/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.25/js/dataTables.bootstrap4.min.js"></script>
+<script>
+$(document).ready(function() {
+    $('#paymentsTable').DataTable({
+        "pageLength": 25,
+        "order": [[ 6, "desc" ]],
+        "columnDefs": [
+            { "orderable": false, "targets": 7 }
+        ]
+    });
+});
+
+function updatePaymentStatus(paymentId, status) {
+    if (confirm(`Are you sure you want to mark this payment as ${status}?`)) {
+        // Create a form and submit it
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = `/payments/admin/${paymentId}/`;
+        
+        // Add CSRF token
+        const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+        const csrfInput = document.createElement('input');
+        csrfInput.type = 'hidden';
+        csrfInput.name = 'csrfmiddlewaretoken';
+        csrfInput.value = csrfToken;
+        form.appendChild(csrfInput);
+        
+        // Add status
+        const statusInput = document.createElement('input');
+        statusInput.type = 'hidden';
+        statusInput.name = 'status';
+        statusInput.value = status;
+        form.appendChild(statusInput);
+        
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+function exportData(format) {
+    alert(`Export as ${format.toUpperCase()} - Feature coming soon!`);
+    $('#exportModal').modal('hide');
+}
+</script>
+{% endblock %}

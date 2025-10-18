@@ -1,0 +1,177 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Inventory - ShopStack{% endblock %}
+
+{% block content %}
+<div class="dashboard-header mb-4">
+    <div class="row align-items-center">
+        <div class="col">
+            <h1 class="h3 text-gray-800">Inventory Management</h1>
+            <p class="mb-0 text-muted">Monitor and manage your product inventory levels.</p>
+        </div>
+        <div class="col-auto">
+            <a href="{% url 'dashboard:dashboard' %}" class="btn btn-outline-primary">Back to Dashboard</a>
+        </div>
+    </div>
+</div>
+
+<!-- Inventory Alerts -->
+<div class="row mb-4">
+    <div class="col-md-6">
+        <div class="card border-danger shadow h-100">
+            <div class="card-header bg-danger text-white">
+                <h6 class="m-0 font-weight-bold">Out of Stock</h6>
+            </div>
+            <div class="card-body">
+                {% for product in out_of_stock %}
+                <div class="d-flex align-items-center mb-2">
+                    <div class="mr-3">
+                        <i class="fas fa-times-circle text-danger"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h6 class="mb-0">{{ product.name }}</h6>
+                        <small class="text-muted">{{ product.category.name }}</small>
+                    </div>
+                    <div class="text-right">
+                        <span class="badge badge-danger">0 in stock</span>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-muted mb-0">No products are out of stock!</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-6">
+        <div class="card border-warning shadow h-100">
+            <div class="card-header bg-warning text-white">
+                <h6 class="m-0 font-weight-bold">Low Stock Alert</h6>
+            </div>
+            <div class="card-body">
+                {% for product in low_stock %}
+                <div class="d-flex align-items-center mb-2">
+                    <div class="mr-3">
+                        <i class="fas fa-exclamation-triangle text-warning"></i>
+                    </div>
+                    <div class="flex-grow-1">
+                        <h6 class="mb-0">{{ product.name }}</h6>
+                        <small class="text-muted">{{ product.category.name }}</small>
+                    </div>
+                    <div class="text-right">
+                        <span class="badge badge-warning">{{ product.stock_quantity }} left</span>
+                    </div>
+                </div>
+                {% empty %}
+                <p class="text-muted mb-0">All products are well stocked!</p>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Category Inventory Summary -->
+<div class="row mb-4">
+    <div class="col-12">
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Category Inventory Summary</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    {% for category in category_inventory %}
+                    <div class="col-md-3 mb-3">
+                        <div class="card border-left-primary">
+                            <div class="card-body py-3">
+                                <h6 class="font-weight-bold text-primary">{{ category.name }}</h6>
+                                <p class="mb-1">Products: <strong>{{ category.total_products }}</strong></p>
+                                <p class="mb-1">Total Stock: <strong>{{ category.total_stock|default:"0" }}</strong></p>
+                                <p class="mb-0">Avg Price: <strong>${{ category.avg_price|floatformat:2|default:"0.00" }}</strong></p>
+                            </div>
+                        </div>
+                    </div>
+                    {% empty %}
+                    <div class="col-12">
+                        <p class="text-muted text-center">No categories available</p>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Complete Product Inventory -->
+<div class="card shadow">
+    <div class="card-header py-3">
+        <h6 class="m-0 font-weight-bold text-primary">Complete Product Inventory</h6>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-bordered" id="inventoryTable" width="100%" cellspacing="0">
+                <thead>
+                    <tr>
+                        <th>Product Name</th>
+                        <th>Category</th>
+                        <th>Price</th>
+                        <th>Stock Quantity</th>
+                        <th>Status</th>
+                        <th>Created Date</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products %}
+                    <tr>
+                        <td>{{ product.name }}</td>
+                        <td>{{ product.category.name }}</td>
+                        <td>${{ product.price }}</td>
+                        <td>{{ product.stock_quantity }}</td>
+                        <td>
+                            {% if product.stock_quantity == 0 %}
+                                <span class="badge badge-danger">Out of Stock</span>
+                            {% elif product.stock_quantity <= 10 %}
+                                <span class="badge badge-warning">Low Stock</span>
+                            {% else %}
+                                <span class="badge badge-success">In Stock</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ product.created_at|date:"M d, Y" }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="6" class="text-center text-muted">No products available</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+
+<!-- Include DataTables for better table functionality -->
+<link rel="stylesheet" type="text/css" href="https://cdn.datatables.net/1.10.24/css/dataTables.bootstrap4.min.css">
+<script type="text/javascript" src="https://cdn.datatables.net/1.10.24/js/jquery.dataTables.min.js"></script>
+<script type="text/javascript" src="https://cdn.datatables.net/1.10.24/js/dataTables.bootstrap4.min.js"></script>
+
+<script>
+$(document).ready(function() {
+    $('#inventoryTable').DataTable({
+        "pageLength": 25,
+        "order": [[ 3, "asc" ]], // Sort by stock quantity ascending (lowest first)
+        "columnDefs": [
+            {
+                "targets": 3, // Stock quantity column
+                "createdCell": function (td, cellData, rowData, row, col) {
+                    if (cellData == 0) {
+                        $(td).css('background-color', '#f8d7da');
+                    } else if (cellData <= 10) {
+                        $(td).css('background-color', '#fff3cd');
+                    }
+                }
+            }
+        ]
+    });
+});
+</script>
+{% endblock %}

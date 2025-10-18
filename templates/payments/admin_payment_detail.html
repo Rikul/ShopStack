@@ -1,0 +1,278 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Payment Details - ShopStack Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-sm-flex align-items-center justify-content-between mb-4">
+        <h1 class="h3 mb-0 text-gray-800">
+            <i class="fas fa-credit-card mr-2"></i>Payment Details
+        </h1>
+        <div>
+            <a href="{% url 'admin_payments' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left mr-1"></i>Back to Payments
+            </a>
+            <a href="{% url 'admin_order_detail' payment.order.order_id %}" class="btn btn-primary">
+                <i class="fas fa-shopping-cart mr-1"></i>View Order
+            </a>
+        </div>
+    </div>
+
+    <div class="row">
+        <!-- Payment Information -->
+        <div class="col-lg-8">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3 d-flex justify-content-between align-items-center">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-info-circle mr-2"></i>Payment Information
+                    </h6>
+                    <span class="badge badge-lg 
+                        {% if payment.status == 'completed' %}badge-success
+                        {% elif payment.status == 'pending' %}badge-warning
+                        {% elif payment.status == 'failed' %}badge-danger
+                        {% elif payment.status == 'refunded' %}badge-secondary
+                        {% else %}badge-light{% endif %}">
+                        {{ payment.status|title }}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="font-weight-bold text-gray-800">Payment ID:</label>
+                                <p class="text-gray-900">#{{ payment.payment_id }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="font-weight-bold text-gray-800">Order ID:</label>
+                                <p class="text-gray-900">
+                                    <a href="{% url 'admin_order_detail' payment.order.order_id %}" 
+                                       class="text-primary">
+                                        #{{ payment.order.order_id }}
+                                    </a>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="font-weight-bold text-gray-800">Amount:</label>
+                                <p class="text-gray-900 h4 text-success">${{ payment.amount|floatformat:2 }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="font-weight-bold text-gray-800">Payment Method:</label>
+                                <p class="text-gray-900">
+                                    <span class="badge badge-info">{{ payment.payment_method|title }}</span>
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="font-weight-bold text-gray-800">Created Date:</label>
+                                <p class="text-gray-900">{{ payment.created_at|date:"F d, Y, g:i A" }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="form-group">
+                                <label class="font-weight-bold text-gray-800">Last Updated:</label>
+                                <p class="text-gray-900">{{ payment.updated_at|date:"F d, Y, g:i A" }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if payment.transaction_id %}
+                    <div class="form-group">
+                        <label class="font-weight-bold text-gray-800">Transaction ID:</label>
+                        <p class="text-gray-900 font-monospace">{{ payment.transaction_id }}</p>
+                    </div>
+                    {% endif %}
+
+                    {% if payment.notes %}
+                    <div class="form-group">
+                        <label class="font-weight-bold text-gray-800">Notes:</label>
+                        <p class="text-gray-900">{{ payment.notes }}</p>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+
+        <!-- Payment Actions -->
+        <div class="col-lg-4">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-cogs mr-2"></i>Payment Actions
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <form method="post">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="status" class="font-weight-bold">Update Status:</label>
+                            <select name="status" id="status" class="form-control">
+                                <option value="pending" {% if payment.status == 'pending' %}selected{% endif %}>Pending</option>
+                                <option value="completed" {% if payment.status == 'completed' %}selected{% endif %}>Completed</option>
+                                <option value="failed" {% if payment.status == 'failed' %}selected{% endif %}>Failed</option>
+                                <option value="refunded" {% if payment.status == 'refunded' %}selected{% endif %}>Refunded</option>
+                            </select>
+                        </div>
+                        <button type="submit" class="btn btn-primary btn-block">
+                            <i class="fas fa-save mr-1"></i>Update Status
+                        </button>
+                    </form>
+
+                    <hr>
+
+                    <div class="btn-group-vertical w-100">
+                        <button class="btn btn-outline-info btn-sm mb-2" onclick="printReceipt()">
+                            <i class="fas fa-print mr-1"></i>Print Receipt
+                        </button>
+                        <button class="btn btn-outline-warning btn-sm mb-2" onclick="sendNotification()">
+                            <i class="fas fa-envelope mr-1"></i>Send Notification
+                        </button>
+                        {% if payment.status == 'completed' %}
+                        <button class="btn btn-outline-danger btn-sm" onclick="initiateRefund()">
+                            <i class="fas fa-undo mr-1"></i>Initiate Refund
+                        </button>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Customer Information -->
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-user mr-2"></i>Customer Information
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-3">
+                        <div class="avatar-lg bg-primary rounded-circle d-inline-flex align-items-center justify-content-center">
+                            <span class="text-white h4 mb-0">
+                                {{ payment.order.user.username|first|upper }}
+                            </span>
+                        </div>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="font-weight-bold text-gray-800">Username:</label>
+                        <p class="text-gray-900">{{ payment.order.user.username }}</p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="font-weight-bold text-gray-800">Email:</label>
+                        <p class="text-gray-900">{{ payment.order.user.email|default:"Not provided" }}</p>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="font-weight-bold text-gray-800">Join Date:</label>
+                        <p class="text-gray-900">{{ payment.order.user.date_joined|date:"F d, Y" }}</p>
+                    </div>
+
+                    <a href="#" class="btn btn-outline-primary btn-sm btn-block">
+                        <i class="fas fa-user-edit mr-1"></i>View Customer Profile
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Order Details -->
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow mb-4">
+                <div class="card-header py-3">
+                    <h6 class="m-0 font-weight-bold text-primary">
+                        <i class="fas fa-shopping-cart mr-2"></i>Related Order Details
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="row">
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="font-weight-bold text-gray-800">Order Total:</label>
+                                <p class="text-gray-900 h5 text-success">${{ payment.order.total_amount|floatformat:2 }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="font-weight-bold text-gray-800">Order Status:</label>
+                                <p class="text-gray-900">
+                                    <span class="badge badge-primary">{{ payment.order.status|title }}</span>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="font-weight-bold text-gray-800">Order Date:</label>
+                                <p class="text-gray-900">{{ payment.order.created_at|date:"F d, Y" }}</p>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="form-group">
+                                <label class="font-weight-bold text-gray-800">Notes:</label>
+                                <p class="text-gray-900">{{ payment.order.notes|default:"Not provided" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="text-center">
+                        <a href="{% url 'admin_order_detail' payment.order.order_id %}" 
+                           class="btn btn-primary">
+                            <i class="fas fa-external-link-alt mr-1"></i>View Full Order Details
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.avatar-lg {
+    width: 60px;
+    height: 60px;
+}
+
+.badge-lg {
+    font-size: 0.875rem;
+    padding: 0.5rem 0.75rem;
+}
+
+.font-monospace {
+    font-family: 'Courier New', monospace;
+}
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+function printReceipt() {
+    alert('Print receipt functionality - Coming soon!');
+}
+
+function sendNotification() {
+    if (confirm('Send payment notification to customer?')) {
+        alert('Notification sent successfully!');
+    }
+}
+
+function initiateRefund() {
+    if (confirm('Are you sure you want to initiate a refund for this payment? This action cannot be undone.')) {
+        alert('Refund initiated - Feature coming soon!');
+    }
+}
+</script>
+{% endblock %}

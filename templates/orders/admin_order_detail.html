@@ -1,0 +1,267 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Order #{{ order.order_id }} Details - ShopStack{% endblock %}
+
+{% block content %}
+<div class="dashboard-header mb-4">
+    <div class="row align-items-center">
+        <div class="col">
+            <h1 class="h3 text-gray-800">Order #{{ order.order_id }}</h1>
+            <p class="mb-0 text-muted">Order details and management options.</p>
+        </div>
+        <div class="col-auto">
+            <div class="btn-group" role="group">
+                <button class="btn btn-outline-primary" onclick="window.print()">
+                    <i class="fas fa-print mr-2"></i>Print Invoice
+                </button>
+                <a href="{% url 'admin_orders' %}" class="btn btn-outline-secondary">
+                    <i class="fas fa-arrow-left mr-2"></i>Back to Orders
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Order Information -->
+    <div class="col-lg-8">
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Order Information</h6>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <table class="table table-borderless">
+                            <tr>
+                                <th width="40%">Order ID:</th>
+                                <td><strong>#{{ order.order_id }}</strong></td>
+                            </tr>
+                            <tr>
+                                <th>Customer:</th>
+                                <td>{{ order.user.get_full_name|default:order.user.username }}</td>
+                            </tr>
+                            <tr>
+                                <th>Email:</th>
+                                <td>{{ order.user.email }}</td>
+                            </tr>
+                            <tr>
+                                <th>Phone:</th>
+                                <td>{{ order.user.phone_number|default:"Not provided" }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                    <div class="col-md-6">
+                        <table class="table table-borderless">
+                            <tr>
+                                <th width="40%">Order Date:</th>
+                                <td>{{ order.created_at|date:"F d, Y \a\t g:i A" }}</td>
+                            </tr>
+                            <tr>
+                                <th>Status:</th>
+                                <td>
+                                    <span class="badge badge-{% if order.status == 'delivered' %}success{% elif order.status == 'pending' %}warning{% elif order.status == 'cancelled' %}danger{% elif order.status == 'shipped' %}info{% else %}primary{% endif %}">
+                                        {{ order.get_status_display }}
+                                    </span>
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Total Amount:</th>
+                                <td><strong class="text-success">${{ order.total_amount|floatformat:2 }}</strong></td>
+                            </tr>
+                            <tr>
+                                <th>Items Count:</th>
+                                <td>{{ order.items.count }} item{{ order.items.count|pluralize }}</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+                
+                {% if order.user.address %}
+                <div class="mt-3">
+                    <h6 class="font-weight-bold">Shipping Address:</h6>
+                    <p class="text-muted">{{ order.user.address }}</p>
+                </div>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Order Items -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Order Items</h6>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered">
+                        <thead>
+                            <tr>
+                                <th>Product</th>
+                                <th>Quantity</th>
+                                <th>Unit Price</th>
+                                <th>Total Price</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in order_items %}
+                            <tr>
+                                <td>
+                                    <div class="d-flex align-items-center">
+                                        {% if item.product.image_url %}
+                                            <img src="{{ item.product.image_url.url }}" 
+                                                 alt="{{ item.product.name }}" 
+                                                 class="mr-3 rounded" style="width: 50px; height: 50px; object-fit: cover;">
+                                        {% else %}
+                                            <div class="bg-light mr-3 d-flex align-items-center justify-content-center rounded" 
+                                                 style="width: 50px; height: 50px;">
+                                                <i class="fas fa-image text-muted"></i>
+                                            </div>
+                                        {% endif %}
+                                        <div>
+                                            <h6 class="mb-0">{{ item.product.name }}</h6>
+                                            <small class="text-muted">{{ item.product.category.name }}</small>
+                                        </div>
+                                    </div>
+                                </td>
+                                <td>
+                                    <span class="badge badge-primary">{{ item.quantity }}</span>
+                                </td>
+                                <td>
+                                    <strong>${{ item.price|floatformat:2 }}</strong>
+                                </td>
+                                <td>
+                                    <strong class="text-success">${{ item.subtotal|floatformat:2 }}</strong>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr class="table-active">
+                                <th colspan="3" class="text-right">Total:</th>
+                                <th class="text-success">${{ order.total_amount|floatformat:2 }}</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Order Actions -->
+    <div class="col-lg-4">
+        <!-- Status Update -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Update Order Status</h6>
+            </div>
+            <div class="card-body">
+                <form method="POST">
+                    {% csrf_token %}
+                    <div class="form-group">
+                        <label for="status">Current Status:</label>
+                        <select name="status" id="status" class="form-control">
+                            <option value="pending" {% if order.status == 'pending' %}selected{% endif %}>Pending</option>
+                            <option value="processing" {% if order.status == 'processing' %}selected{% endif %}>Processing</option>
+                            <option value="shipped" {% if order.status == 'shipped' %}selected{% endif %}>Shipped</option>
+                            <option value="delivered" {% if order.status == 'delivered' %}selected{% endif %}>Delivered</option>
+                            <option value="cancelled" {% if order.status == 'cancelled' %}selected{% endif %}>Cancelled</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary btn-block">
+                        <i class="fas fa-save mr-2"></i>Update Status
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="card shadow mb-4">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Quick Actions</h6>
+            </div>
+            <div class="card-body">
+                <div class="d-grid gap-2">
+                    <button class="btn btn-info btn-block mb-2">
+                        <i class="fas fa-envelope mr-2"></i>Send Email
+                    </button>
+                    <button class="btn btn-warning btn-block mb-2">
+                        <i class="fas fa-edit mr-2"></i>Edit Order
+                    </button>
+                    <button class="btn btn-success btn-block mb-2">
+                        <i class="fas fa-file-invoice mr-2"></i>Generate Invoice
+                    </button>
+                    <button class="btn btn-danger btn-block"
+                            onclick="return confirm('Are you sure you want to cancel this order?')">
+                        <i class="fas fa-times mr-2"></i>Cancel Order
+                    </button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Order Timeline -->
+        <div class="card shadow">
+            <div class="card-header py-3">
+                <h6 class="m-0 font-weight-bold text-primary">Order Timeline</h6>
+            </div>
+            <div class="card-body">
+                <div class="timeline">
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-success"></div>
+                        <div class="timeline-content">
+                            <h6 class="timeline-title">Order Placed</h6>
+                            <p class="timeline-description">{{ order.created_at|date:"M d, Y \a\t g:i A" }}</p>
+                        </div>
+                    </div>
+                    
+                    {% if order.status != 'pending' %}
+                    <div class="timeline-item">
+                        <div class="timeline-marker bg-info"></div>
+                        <div class="timeline-content">
+                            <h6 class="timeline-title">Order {{ order.get_status_display }}</h6>
+                            <p class="timeline-description">Current status</p>
+                        </div>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.timeline {
+    position: relative;
+}
+
+.timeline-item {
+    position: relative;
+    padding-left: 30px;
+    padding-bottom: 20px;
+}
+
+.timeline-marker {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 12px;
+    height: 12px;
+    border-radius: 50%;
+}
+
+.timeline-content {
+    margin-left: 10px;
+}
+
+.timeline-title {
+    margin-bottom: 5px;
+    font-size: 14px;
+}
+
+.timeline-description {
+    font-size: 12px;
+    color: #6c757d;
+    margin-bottom: 0;
+}
+</style>
+{% endblock %}
