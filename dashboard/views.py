@@ -5,7 +5,6 @@ from django.utils import timezone
 from datetime import timedelta
 from products.models import Product, Category
 from orders.models import Order
-from accounts.models import User
 
 @login_required
 def dashboard_view(request):
@@ -14,7 +13,6 @@ def dashboard_view(request):
     # Basic statistics
     total_products = Product.objects.count()
     total_categories = Category.objects.count()
-    total_users = User.objects.count()
     total_orders = Order.objects.count()
     
     # Recent orders (last 30 days)
@@ -47,7 +45,6 @@ def dashboard_view(request):
     context = {
         'total_products': total_products,
         'total_categories': total_categories,
-        'total_users': total_users,
         'total_orders': total_orders,
         'recent_orders': recent_orders,
         'total_revenue': total_revenue,
