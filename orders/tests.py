@@ -1,16 +1,21 @@
 from django.test import TestCase
-from .models import Order, OrderItem
+
+from accounts.models import Customer
 from products.models import Category, Product
-from accounts.models import User
+
+from .models import Order, OrderItem
+
 
 class OrderModelTest(TestCase):
 
     def setUp(self):
-        self.user = User.objects.create_user(
-            username='testuser',
-            email='testuser@example.com',
-            password='testpassword'
+        self.customer = Customer.objects.create(
+            username='testcustomer',
+            email='testcustomer@example.com',
+            password='testpassword',
         )
+        self.customer.set_password('testpassword')
+        self.customer.save()
         self.category = Category.objects.create(
             name='Apparel',
             description='Clothing and accessories'
@@ -23,7 +28,7 @@ class OrderModelTest(TestCase):
             category=self.category
         )
         self.order = Order.objects.create(
-            user=self.user,
+            customer=self.customer,
             total_amount=20.00,
             status='pending'
         )
@@ -35,7 +40,7 @@ class OrderModelTest(TestCase):
         )
 
     def test_order_creation(self):
-        self.assertEqual(self.order.user.username, 'testuser')
+        self.assertEqual(self.order.customer.username, 'testcustomer')
         self.assertEqual(self.order.total_amount, 20.00)
         self.assertEqual(self.order.status, 'pending')
 

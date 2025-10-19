@@ -1,6 +1,6 @@
-from django.contrib.auth import get_user_model
 from django.test import TestCase
 
+from accounts.models import Customer
 from orders.models import Order
 from products.models import Category, Product
 
@@ -9,12 +9,13 @@ from .models import Payment
 
 class PaymentModelTest(TestCase):
     def setUp(self):
-        User = get_user_model()
-        self.user = User.objects.create_user(
+        self.customer = Customer.objects.create(
             username='paymenttester',
             email='paymenttester@example.com',
-            password='testpassword'
+            password='testpassword',
         )
+        self.customer.set_password('testpassword')
+        self.customer.save()
         self.category = Category.objects.create(
             name='Services',
             description='Service offerings'
@@ -27,7 +28,7 @@ class PaymentModelTest(TestCase):
             category=self.category
         )
         self.order = Order.objects.create(
-            user=self.user,
+            customer=self.customer,
             total_amount=100.00,
             status='pending'
         )

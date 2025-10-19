@@ -171,7 +171,7 @@
                     {% for order_item in product.orderitem_set.all|slice:":10" %}
                     <tr>
                         <td>#{{ order_item.order.order_id }}</td>
-                        <td>{{ order_item.order.user.username }}</td>
+                        <td>{{ order_item.order.customer.username }}</td>
                         <td>{{ order_item.quantity }}</td>
                         <td>${{ order_item.price }}</td>
                         <td>${{ order_item.subtotal }}</td>

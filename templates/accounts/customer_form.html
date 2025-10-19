@@ -152,7 +152,7 @@
                     <div class="alert alert-info">
                         <i class="fas fa-info-circle mr-2"></i>
                         Customer joined on <strong>{{ customer.date_joined|date:"F d, Y" }}</strong>.
-                        {% with order_count=customer.order_set.count %}
+                        {% with order_count=customer.orders.count %}
                             This customer has <strong>{{ order_count }}</strong> order{{ order_count|pluralize }}.
                         {% endwith %}
                     </div>

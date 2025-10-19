@@ -7,10 +7,10 @@ from .models import Order, OrderItem
 class OrderForm(forms.ModelForm):
     class Meta:
         model = Order
-        fields = ['user', 'status']
+        fields = ['customer', 'status']
         widgets = {
             'status': forms.Select(attrs={'class': 'form-control'}),
-            'user': forms.Select(attrs={'class': 'form-control'}),
+            'customer': forms.Select(attrs={'class': 'form-control'}),
         }
 
 

@@ -41,7 +41,7 @@ def dashboard_view(request):
     low_stock_products = Product.objects.filter(stock_quantity__lt=10)[:5]
     
     # Recent orders
-    recent_orders_list = Order.objects.select_related('user').order_by('-created_at')[:5]
+    recent_orders_list = Order.objects.select_related('customer').order_by('-created_at')[:5]
     
     context = {
         'total_products': total_products,

@@ -12,7 +12,7 @@ from .models import Order
 @staff_member_required
 def admin_orders(request):
     """Admin view for managing all orders"""
-    orders = Order.objects.select_related('user').prefetch_related('items__product').order_by('-created_at')
+    orders = Order.objects.select_related('customer').prefetch_related('items__product').order_by('-created_at')
     
     # Filter by status if requested
     status_filter = request.GET.get('status')
@@ -24,8 +24,8 @@ def admin_orders(request):
     if search_query:
         orders = orders.filter(
             Q(order_id__icontains=search_query) |
-            Q(user__username__icontains=search_query) |
-            Q(user__email__icontains=search_query)
+            Q(customer__username__icontains=search_query) |
+            Q(customer__email__icontains=search_query)
         )
     
     context = {

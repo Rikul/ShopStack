@@ -1,6 +1,8 @@
 from django.test import TestCase
 from django.urls import reverse
-from .models import User
+
+from .models import Customer, User
+
 
 class UserModelTests(TestCase):
 
@@ -14,6 +16,24 @@ class UserModelTests(TestCase):
     def test_user_creation(self):
         self.assertEqual(self.user.username, 'testuser')
         self.assertEqual(self.user.email, 'testuser@example.com')
+
+
+class CustomerModelTests(TestCase):
+
+    def test_customer_creation(self):
+        customer = Customer(
+            username='customer',
+            email='customer@example.com',
+            first_name='Test',
+            last_name='Customer'
+        )
+        customer.set_password('securepass')
+        customer.save()
+
+        self.assertTrue(customer.check_password('securepass'))
+        self.assertEqual(customer.get_full_name(), 'Test Customer')
+        self.assertTrue(customer.is_active)
+
 
 class UserViewsTests(TestCase):
 
