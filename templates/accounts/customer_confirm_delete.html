@@ -1,0 +1,111 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}Delete Customer - ShopStack{% endblock %}
+
+{% block content %}
+<div class="dashboard-header mb-4">
+    <div class="row align-items-center">
+        <div class="col">
+            <h1 class="h3 text-gray-800">Delete Customer</h1>
+            <p class="mb-0 text-muted">Confirm customer deletion.</p>
+        </div>
+        <div class="col-auto">
+            <a href="{% url 'customer_list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left mr-2"></i>Back to Customers
+            </a>
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <div class="col-lg-8 mx-auto">
+        <div class="card shadow border-danger">
+            <div class="card-header bg-danger text-white py-3">
+                <h6 class="m-0 font-weight-bold">
+                    <i class="fas fa-exclamation-triangle mr-2"></i>Confirm Deletion
+                </h6>
+            </div>
+            <div class="card-body">
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-circle mr-2"></i>
+                    <strong>Warning:</strong> This action cannot be undone!
+                </div>
+
+                <p class="mb-4">Are you sure you want to delete the following customer?</p>
+
+                <div class="card bg-light">
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p class="mb-2">
+                                    <strong>Username:</strong><br>
+                                    {{ customer.username }}
+                                </p>
+                                <p class="mb-2">
+                                    <strong>Email:</strong><br>
+                                    {{ customer.email }}
+                                </p>
+                                <p class="mb-2">
+                                    <strong>Name:</strong><br>
+                                    {{ customer.get_full_name|default:"-" }}
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <p class="mb-2">
+                                    <strong>Phone:</strong><br>
+                                    {{ customer.phone_number|default:"-" }}
+                                </p>
+                                <p class="mb-2">
+                                    <strong>Status:</strong><br>
+                                    {% if customer.is_active %}
+                                        <span class="badge badge-success">Active</span>
+                                    {% else %}
+                                        <span class="badge badge-danger">Inactive</span>
+                                    {% endif %}
+                                </p>
+                                <p class="mb-2">
+                                    <strong>Joined:</strong><br>
+                                    {{ customer.date_joined|date:"M d, Y" }}
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                {% with order_count=customer.order_set.count %}
+                    {% if order_count > 0 %}
+                    <div class="alert alert-danger mt-3">
+                        <i class="fas fa-ban mr-2"></i>
+                        <strong>Cannot Delete:</strong> This customer has <strong>{{ order_count }}</strong> order{{ order_count|pluralize }}.
+                        Customers with orders cannot be deleted.
+                    </div>
+                    {% endif %}
+                {% endwith %}
+
+                {% with order_count=customer.order_set.count %}
+                    {% if order_count > 0 %}
+                        <div class="mt-4">
+                            <a href="{% url 'customer_list' %}" class="btn btn-primary btn-block">
+                                <i class="fas fa-arrow-left mr-2"></i>Back to Customer List
+                            </a>
+                        </div>
+                    {% else %}
+                        <form method="post" class="mt-4">
+                            {% csrf_token %}
+                            <div class="d-flex justify-content-between">
+                                <a href="{% url 'customer_list' %}" class="btn btn-secondary">
+                                    <i class="fas fa-times mr-2"></i>Cancel
+                                </a>
+                                <button type="submit" class="btn btn-danger">
+                                    <i class="fas fa-trash mr-2"></i>Yes, Delete Customer
+                                </button>
+                            </div>
+                        </form>
+                    {% endif %}
+                {% endwith %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

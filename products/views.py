@@ -1,23 +1,26 @@
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
 from .models import Product, Category
 
+@staff_member_required
 def product_list(request):
     products = Product.objects.all()
     return render(request, 'products/product_list.html', {'products': products})
 
+@staff_member_required
 def product_detail(request, product_id):
     product = get_object_or_404(Product, product_id=product_id)
     return render(request, 'products/product_detail.html', {'product': product})
 
 # Category CRUD Views
-@login_required
+@staff_member_required
 def category_list(request):
     categories = Category.objects.all().order_by('name')
     return render(request, 'products/category_list.html', {'categories': categories})
 
-@login_required
+@staff_member_required
 def category_create(request):
     if request.method == 'POST':
         name = request.POST.get('name')
@@ -35,7 +38,7 @@ def category_create(request):
     
     return render(request, 'products/category_form.html', {'action': 'Create'})
 
-@login_required
+@staff_member_required
 def category_edit(request, category_id):
     category = get_object_or_404(Category, category_id=category_id)
     
@@ -57,7 +60,7 @@ def category_edit(request, category_id):
     
     return render(request, 'products/category_form.html', {'category': category, 'action': 'Edit'})
 
-@login_required
+@staff_member_required
 def category_delete(request, category_id):
     category = get_object_or_404(Category, category_id=category_id)
 
@@ -73,7 +76,7 @@ def category_delete(request, category_id):
     return render(request, 'products/category_confirm_delete.html', {'category': category})
 
 # Product CRUD Views
-@login_required
+@staff_member_required
 def product_create(request):
     if request.method == 'POST':
         name = request.POST.get('name')
@@ -104,7 +107,7 @@ def product_create(request):
     categories = Category.objects.all().order_by('name')
     return render(request, 'products/product_form.html', {'categories': categories, 'action': 'Create'})
 
-@login_required
+@staff_member_required
 def product_edit(request, product_id):
     product = get_object_or_404(Product, product_id=product_id)
 

@@ -1,12 +1,13 @@
 from django.shortcuts import render
 from django.contrib.auth.decorators import login_required
+from django.contrib.admin.views.decorators import staff_member_required
 from django.db.models import Count, Sum
 from django.utils import timezone
 from datetime import timedelta
 from products.models import Product, Category
 from orders.models import Order
 
-@login_required
+@staff_member_required
 def dashboard_view(request):
     """Main dashboard view with overview statistics"""
     
@@ -57,7 +58,7 @@ def dashboard_view(request):
     
     return render(request, 'dashboard/dashboard.html', context)
 
-@login_required
+@staff_member_required
 def analytics_view(request):
     """Analytics dashboard with charts and detailed metrics"""
     
@@ -116,7 +117,7 @@ def analytics_view(request):
     
     return render(request, 'dashboard/analytics.html', context)
 
-@login_required
+@staff_member_required
 def inventory_view(request):
     """Inventory management dashboard"""
     
