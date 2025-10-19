@@ -7,6 +7,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 from .forms import OrderForm, OrderItemFormSet
 from .models import Order
+from products.models import Product
 
 
 @staff_member_required
@@ -28,10 +29,21 @@ def admin_orders(request):
             Q(customer__email__icontains=search_query)
         )
     
+    product_filter = request.GET.get('product')
+    product_reference = None
+    if product_filter:
+        orders = orders.filter(items__product__product_id=product_filter).distinct()
+        try:
+            product_reference = Product.objects.get(product_id=product_filter)
+        except (Product.DoesNotExist, ValueError):
+            product_reference = None
+
     context = {
         'orders': orders,
         'status_filter': status_filter,
         'search_query': search_query,
+        'product_filter': product_filter,
+        'product_reference': product_reference,
         'order_statuses': Order.objects.values_list('status', flat=True).distinct(),
     }
     return render(request, 'orders/admin_orders.html', context)
