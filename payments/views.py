@@ -10,7 +10,7 @@ from .models import Payment
 @staff_member_required
 def admin_payments(request):
     """Admin view for managing all payments"""
-    payments = Payment.objects.select_related('order__user').order_by('-created_at')
+    payments = Payment.objects.select_related('order__customer').order_by('-created_at')
     
     # Filter by status if requested
     status_filter = request.GET.get('status')
@@ -23,7 +23,7 @@ def admin_payments(request):
         payments = payments.filter(
             Q(payment_id__icontains=search_query) |
             Q(order__order_id__icontains=search_query) |
-            Q(order__user__username__icontains=search_query)
+            Q(order__customer__username__icontains=search_query)
         )
     
     # Calculate summary stats

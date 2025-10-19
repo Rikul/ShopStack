@@ -4,7 +4,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import redirect, render, get_object_or_404
 from django.db.models import Q
-from .models import User
+from .models import Customer, User
 
 def login_view(request):
     if request.method == 'POST':
@@ -28,7 +28,7 @@ def profile(request):
 @staff_member_required
 def customer_list(request):
     """Admin view for managing all customers"""
-    customers = User.objects.all().order_by('-date_joined')
+    customers = Customer.objects.all().order_by('-date_joined')
 
     # Search functionality
     search_query = request.GET.get('search')
@@ -62,17 +62,17 @@ def customer_create(request):
 
         if username and email and password:
             try:
-                user = User.objects.create_user(
+                customer = Customer(
                     username=username,
                     email=email,
-                    password=password,
                     first_name=first_name,
                     last_name=last_name,
                     phone_number=phone_number,
                     address=address,
-                    is_staff=False,
                     is_active=is_active
                 )
+                customer.set_password(password)
+                customer.save()
                 messages.success(request, f'Customer "{username}" created successfully!')
                 return redirect('customer_list')
             except Exception as e:
@@ -83,9 +83,9 @@ def customer_create(request):
     return render(request, 'accounts/customer_form.html', {'action': 'Create'})
 
 @staff_member_required
-def customer_edit(request, user_id):
+def customer_edit(request, customer_id):
     """Admin view for editing a customer"""
-    customer = get_object_or_404(User, id=user_id)
+    customer = get_object_or_404(Customer, id=customer_id)
 
     if request.method == 'POST':
         username = request.POST.get('username')
@@ -122,13 +122,13 @@ def customer_edit(request, user_id):
     return render(request, 'accounts/customer_form.html', {'customer': customer, 'action': 'Edit'})
 
 @staff_member_required
-def customer_delete(request, user_id):
+def customer_delete(request, customer_id):
     """Admin view for deleting a customer"""
-    customer = get_object_or_404(User, id=user_id)
+    customer = get_object_or_404(Customer, id=customer_id)
 
     # Check if customer can be deleted
-    if customer.order_set.count() > 0:
-        messages.error(request, f'This customer has {customer.order_set.count()} order(s) and cannot be deleted.')
+    if customer.orders.count() > 0:
+        messages.error(request, f'This customer has {customer.orders.count()} order(s) and cannot be deleted.')
         return redirect('customer_list')
 
     if request.method == 'POST':

@@ -1,13 +1,11 @@
 from django.core.management.base import BaseCommand
-from django.contrib.auth import get_user_model
 from products.models import Category, Product
 from orders.models import Order, OrderItem
 from decimal import Decimal
 import random
 from datetime import timedelta
 from django.utils import timezone
-
-User = get_user_model()
+from accounts.models import Customer
 
 class Command(BaseCommand):
     help = 'Create sample data for the dashboard'
@@ -80,12 +78,12 @@ class Command(BaseCommand):
             if created:
                 self.stdout.write(f'Created product: {product.name}')
         
-        # Create sample users if they don't exist
+        # Create sample customers if they don't exist
         sample_users = ['john_doe', 'jane_smith', 'mike_johnson', 'sarah_wilson', 'alex_brown']
-        users = []
-        
+        customers = []
+
         for username in sample_users:
-            user, created = User.objects.get_or_create(
+            customer, created = Customer.objects.get_or_create(
                 username=username,
                 defaults={
                     'email': f'{username}@example.com',
@@ -93,24 +91,25 @@ class Command(BaseCommand):
                     'last_name': username.split('_')[1].title(),
                 }
             )
-            if created:
-                user.set_password('password123')
-                user.save()
-                self.stdout.write(f'Created user: {user.username}')
-            users.append(user)
+            if created or not customer.password:
+                customer.set_password('password123')
+                customer.save()
+                if created:
+                    self.stdout.write(f'Created customer: {customer.username}')
+            customers.append(customer)
         
         # Create sample orders
         order_statuses = ['pending', 'processing', 'shipped', 'delivered', 'cancelled']
         
         for i in range(50):
-            user = random.choice(users)
+            customer = random.choice(customers)
             status = random.choice(order_statuses)
             
             # Create order with random date within last 90 days
             created_date = timezone.now() - timedelta(days=random.randint(0, 90))
             
             order = Order.objects.create(
-                user=user,
+                customer=customer,
                 status=status,
                 total_amount=Decimal('0.00'),
                 created_at=created_date
@@ -142,7 +141,7 @@ class Command(BaseCommand):
                 f'Successfully created sample data:\n'
                 f'- {len(categories)} categories\n'
                 f'- {len(products)} products\n'
-                f'- {len(users)} users\n'
+                f'- {len(customers)} customers\n'
                 f'- 50 orders with order items'
             )
         )

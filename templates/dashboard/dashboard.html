@@ -206,7 +206,7 @@
                     {% for order in recent_orders_list %}
                     <tr>
                         <td>#{{ order.order_id }}</td>
-                        <td>{{ order.user.username }}</td>
+                        <td>{{ order.customer.username }}</td>
                         <td>
                             <span class="badge badge-{% if order.status == 'delivered' %}success{% elif order.status == 'pending' %}warning{% elif order.status == 'cancelled' %}danger{% else %}info{% endif %}">
                                 {{ order.get_status_display }}

@@ -91,9 +91,9 @@
                         </td>
                         <td>
                             <div>
-                                <strong>{{ order.user.get_full_name|default:order.user.username }}</strong>
+                                <strong>{{ order.customer.get_full_name|default:order.customer.username }}</strong>
                                 <br>
-                                <small class="text-muted">{{ order.user.email }}</small>
+                                <small class="text-muted">{{ order.customer.email }}</small>
                             </div>
                         </td>
                         <td>

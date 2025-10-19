@@ -161,24 +161,24 @@
                     <div class="text-center mb-3">
                         <div class="avatar-lg bg-primary rounded-circle d-inline-flex align-items-center justify-content-center">
                             <span class="text-white h4 mb-0">
-                                {{ payment.order.user.username|first|upper }}
+                                {{ payment.order.customer.username|first|upper }}
                             </span>
                         </div>
                     </div>
                     
                     <div class="form-group">
                         <label class="font-weight-bold text-gray-800">Username:</label>
-                        <p class="text-gray-900">{{ payment.order.user.username }}</p>
+                        <p class="text-gray-900">{{ payment.order.customer.username }}</p>
                     </div>
                     
                     <div class="form-group">
                         <label class="font-weight-bold text-gray-800">Email:</label>
-                        <p class="text-gray-900">{{ payment.order.user.email|default:"Not provided" }}</p>
+                        <p class="text-gray-900">{{ payment.order.customer.email|default:"Not provided" }}</p>
                     </div>
                     
                     <div class="form-group">
                         <label class="font-weight-bold text-gray-800">Join Date:</label>
-                        <p class="text-gray-900">{{ payment.order.user.date_joined|date:"F d, Y" }}</p>
+                        <p class="text-gray-900">{{ payment.order.customer.date_joined|date:"F d, Y" }}</p>
                     </div>
 
                     <a href="#" class="btn btn-outline-primary btn-sm btn-block">

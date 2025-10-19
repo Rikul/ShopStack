@@ -102,7 +102,7 @@
                                    class="btn btn-sm btn-outline-warning" title="Edit Customer">
                                     <i class="fas fa-edit"></i>
                                 </a>
-                                {% if customer.order_set.count > 0 %}
+                                {% if customer.orders.count > 0 %}
                                     <button class="btn btn-sm btn-outline-secondary" title="Customer has orders" disabled>
                                         <i class="fas fa-ban"></i>
                                     </button>
