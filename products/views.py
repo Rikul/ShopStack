@@ -1,7 +1,9 @@
+from decimal import Decimal
+
 from django.shortcuts import render, get_object_or_404, redirect
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
+from django.db.models import DecimalField, F, Sum
 from .models import Product, Category
 
 @staff_member_required
@@ -12,7 +14,36 @@ def product_list(request):
 @staff_member_required
 def product_detail(request, product_id):
     product = get_object_or_404(Product, product_id=product_id)
-    return render(request, 'products/product_detail.html', {'product': product})
+    order_items = (
+        product.orderitem_set.select_related('order__customer')
+        .order_by('-order__created_at')
+    )
+    total_revenue = order_items.aggregate(
+        total=Sum(
+            F('price') * F('quantity'),
+            output_field=DecimalField(max_digits=12, decimal_places=2),
+        )
+    )['total'] or Decimal('0.00')
+
+    reviews_manager = getattr(product, 'review_set', None)
+    review_count = 0
+    reviews = []
+    if reviews_manager is not None:
+        review_count = reviews_manager.count()
+        try:
+            reviews = reviews_manager.select_related('user').order_by('-created_at')
+        except Exception:
+            reviews = reviews_manager.order_by('-created_at')
+
+    context = {
+        'product': product,
+        'order_items': order_items,
+        'total_revenue': total_revenue,
+        'order_count': order_items.count(),
+        'review_count': review_count,
+        'reviews': reviews,
+    }
+    return render(request, 'products/product_detail.html', context)
 
 # Category CRUD Views
 @staff_member_required
@@ -139,3 +170,19 @@ def product_edit(request, product_id):
 
     categories = Category.objects.all().order_by('name')
     return render(request, 'products/product_form.html', {'product': product, 'categories': categories, 'action': 'Edit'})
+
+
+@staff_member_required
+def product_delete(request, product_id):
+    product = get_object_or_404(Product, product_id=product_id)
+
+    if request.method == 'POST':
+        product_name = product.name
+        try:
+            product.delete()
+            messages.success(request, f'Product "{product_name}" deleted successfully!')
+            return redirect('product_list')
+        except Exception as exc:
+            messages.error(request, f'Error deleting product: {exc}')
+
+    return render(request, 'products/product_confirm_delete.html', {'product': product})

@@ -36,6 +36,9 @@
     </div>
     <div class="card-body">
         <form method="GET" class="row">
+            {% if product_filter %}
+            <input type="hidden" name="product" value="{{ product_filter }}">
+            {% endif %}
             <div class="col-md-4">
                 <label for="status">Order Status:</label>
                 <select name="status" id="status" class="form-control">
@@ -63,6 +66,18 @@
         </form>
     </div>
 </div>
+
+{% if product_filter %}
+<div class="alert alert-info d-flex justify-content-between align-items-center">
+    <div>
+        <i class="fas fa-box mr-2"></i>
+        Showing orders containing product #{{ product_filter }}{% if product_reference %} ({{ product_reference.name }}){% endif %}.
+    </div>
+    <a href="{% url 'admin_orders' %}" class="btn btn-sm btn-outline-primary">
+        <i class="fas fa-times mr-1"></i>Clear Product Filter
+    </a>
+</div>
+{% endif %}
 
 <!-- Orders Table -->
 <div class="card shadow">
