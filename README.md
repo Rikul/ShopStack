@@ -25,7 +25,12 @@ This is a Django-based ecommerce project that allows users to browse product and
    python manage.py migrate
    ```
 
-5. Run the development server:
+5. Create a superuser for admin access:
+    ```
+    python manage.py createsuperuser
+    ```
+
+6. Run the development server:
    ```
    python manage.py runserver
    ```

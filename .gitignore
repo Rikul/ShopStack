@@ -214,3 +214,5 @@ CLAUDE.md
 DASHBOARD.md
 db.sqlite3
 db.sql
+
+pyproject.toml
