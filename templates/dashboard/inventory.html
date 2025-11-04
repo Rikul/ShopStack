@@ -16,72 +16,18 @@
     </div>
 </div>
 
-<!-- Inventory Alerts -->
+<!-- Inventory Overview -->
 <div class="row mb-4">
-    <div class="col-md-6">
-        <div class="card border-danger shadow h-100">
-            <div class="card-header bg-danger text-white">
-                <h6 class="m-0 font-weight-bold">Out of Stock</h6>
-            </div>
-            <div class="card-body">
-                {% for product in out_of_stock %}
-                <div class="d-flex align-items-center mb-2">
-                    <div class="mr-3">
-                        <i class="fas fa-times-circle text-danger"></i>
-                    </div>
-                    <div class="flex-grow-1">
-                        <h6 class="mb-0">{{ product.name }}</h6>
-                        <small class="text-muted">{{ product.category.name }}</small>
-                    </div>
-                    <div class="text-right">
-                        <span class="badge badge-danger">0 in stock</span>
-                    </div>
-                </div>
-                {% empty %}
-                <p class="text-muted mb-0">No products are out of stock!</p>
-                {% endfor %}
-            </div>
-        </div>
-    </div>
-
-    <div class="col-md-6">
-        <div class="card border-warning shadow h-100">
-            <div class="card-header bg-warning text-white">
-                <h6 class="m-0 font-weight-bold">Low Stock Alert</h6>
-            </div>
-            <div class="card-body">
-                {% for product in low_stock %}
-                <div class="d-flex align-items-center mb-2">
-                    <div class="mr-3">
-                        <i class="fas fa-exclamation-triangle text-warning"></i>
-                    </div>
-                    <div class="flex-grow-1">
-                        <h6 class="mb-0">{{ product.name }}</h6>
-                        <small class="text-muted">{{ product.category.name }}</small>
-                    </div>
-                    <div class="text-right">
-                        <span class="badge badge-warning">{{ product.stock_quantity }} left</span>
-                    </div>
-                </div>
-                {% empty %}
-                <p class="text-muted mb-0">All products are well stocked!</p>
-                {% endfor %}
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Category Inventory Summary -->
-<div class="row mb-4">
-    <div class="col-12">
-        <div class="card shadow">
+    <!-- Left Column: Inventory Summary -->
+    <div class="col-lg-8">
+        <div class="card shadow h-100">
             <div class="card-header py-3">
-                <h6 class="m-0 font-weight-bold text-primary">Category Inventory Summary</h6>
+                <h6 class="m-0 font-weight-bold text-primary">Inventory Summary</h6>
             </div>
             <div class="card-body">
                 <div class="row">
                     {% for category in category_inventory %}
-                    <div class="col-md-3 mb-3">
+                    <div class="col-md-6 mb-3">
                         <div class="card border-left-primary">
                             <div class="card-body py-3">
                                 <h6 class="font-weight-bold text-primary">{{ category.name }}</h6>
@@ -97,6 +43,64 @@
                     </div>
                     {% endfor %}
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column: Stock Alerts -->
+    <div class="col-lg-4">
+        <div class="card shadow h-100">
+            <div class="card-header py-3 bg-warning text-white">
+                <h6 class="m-0 font-weight-bold">Stock Alerts</h6>
+            </div>
+            <div class="card-body">
+                <!-- Out of Stock Section -->
+                {% if out_of_stock %}
+                <div class="mb-3">
+                    <h6 class="font-weight-bold text-danger">
+                        <i class="fas fa-times-circle mr-1"></i>Out of Stock
+                    </h6>
+                    {% for product in out_of_stock %}
+                    <div class="d-flex align-items-center mb-2 pb-2 border-bottom">
+                        <div class="flex-grow-1">
+                            <h6 class="mb-0 small">{{ product.name }}</h6>
+                            <small class="text-muted">{{ product.category.name }}</small>
+                        </div>
+                        <div class="text-right">
+                            <span class="badge badge-danger">0</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- Low Stock Section -->
+                {% if low_stock %}
+                <div>
+                    <h6 class="font-weight-bold text-warning">
+                        <i class="fas fa-exclamation-triangle mr-1"></i>Low Stock
+                    </h6>
+                    {% for product in low_stock %}
+                    <div class="d-flex align-items-center mb-2 pb-2 border-bottom">
+                        <div class="flex-grow-1">
+                            <h6 class="mb-0 small">{{ product.name }}</h6>
+                            <small class="text-muted">{{ product.category.name }}</small>
+                        </div>
+                        <div class="text-right">
+                            <span class="badge badge-warning">{{ product.stock_quantity }}</span>
+                        </div>
+                    </div>
+                    {% endfor %}
+                </div>
+                {% endif %}
+
+                <!-- No Alerts Message -->
+                {% if not out_of_stock and not low_stock %}
+                <div class="text-center py-4">
+                    <i class="fas fa-check-circle fa-3x text-success mb-3"></i>
+                    <p class="text-muted mb-0">All products are well stocked!</p>
+                </div>
+                {% endif %}
             </div>
         </div>
     </div>
