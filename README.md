@@ -25,12 +25,17 @@ This is a Django-based ecommerce project that allows users to browse product and
    python manage.py migrate
    ```
 
-5. Create a superuser for admin access:
+5. Seed the database with initial data:
+   ```
+   python seed_data.py
+    ```
+
+6. Create a superuser for admin access:
     ```
     python manage.py createsuperuser
     ```
 
-6. Run the development server:
+7. Run the development server:
    ```
    python manage.py runserver
    ```
