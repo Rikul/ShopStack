@@ -1,6 +1,5 @@
 from django.contrib import messages
 from django.contrib.auth import authenticate, login
-from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 from django.shortcuts import redirect, render, get_object_or_404
 from django.db.models import Q
@@ -19,10 +18,6 @@ def login_view(request):
         else:
             messages.error(request, 'Invalid username or password. Please try again.')
     return render(request, 'accounts/login.html')
-
-@login_required
-def profile(request):
-    return render(request, 'accounts/profile.html')  # Create a profile.html template for user profile management
 
 # Customer Management Views
 @staff_member_required
