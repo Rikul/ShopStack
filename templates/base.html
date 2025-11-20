@@ -1,6 +1,7 @@
 {% load static %}
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -12,12 +13,14 @@
     <meta name="csrf-token" content="{{ csrf_token }}">
     {% block extra_css %}{% endblock %}
 </head>
+
 <body>
     <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
         <a class="navbar-brand" href="{% url 'dashboard:dashboard' %}">
             <i class="fas fa-store mr-2"></i>ShopStack
         </a>
-        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav"
+            aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
             <span class="navbar-toggler-icon"></span>
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
@@ -35,13 +38,18 @@
                 </li>
                 -->
                 <li class="nav-item">
-                    <a class="nav-link" href="{% url 'dashboard:inventory' %}">
+                    <a class="nav-link" href="{% url 'inventory' %}">
                         <i class="fas fa-boxes mr-1"></i>Inventory
                     </a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-link" href="{% url 'product_list' %}">
-                        <i class="fas fa-cogs mr-1"></i>Manage Products
+                        <i class="fas fa-cogs mr-1"></i>Products
+                    </a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="{% url 'customer_list' %}">
+                        <i class="fas fa-users mr-1"></i>Customers
                     </a>
                 </li>
                 <li class="nav-item">
@@ -54,23 +62,21 @@
                         <i class="fas fa-credit-card mr-1"></i>Payments
                     </a>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-link" href="{% url 'customer_list' %}">
-                        <i class="fas fa-users mr-1"></i>Customers
-                    </a>
-                </li>
+                
             </ul>
             <ul class="navbar-nav">
                 {% if user.is_authenticated %}
                 <li class="nav-item dropdown">
-                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                    <a class="nav-link dropdown-toggle" href="#" id="navbarDropdown" role="button"
+                        data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
                         <i class="fas fa-user mr-1"></i>{{ user.username }}
                     </a>
                     <div class="dropdown-menu dropdown-menu-right" aria-labelledby="navbarDropdown">
                         <form id="logout-form" action="{% url 'logout' %}" method="POST" style="display: none;">
                             {% csrf_token %}
                         </form>
-                        <a class="dropdown-item" href="#" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
+                        <a class="dropdown-item" href="#"
+                            onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                             <i class="fas fa-sign-out-alt mr-2"></i>Logout
                         </a>
                     </div>
@@ -88,23 +94,24 @@
 
     <div class="container-fluid mt-4">
         {% if messages %}
-            {% for message in messages %}
-                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-            {% endfor %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+            {{ message }}
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        {% endfor %}
         {% endif %}
-        
+
         {% block content %}
         {% endblock %}
     </div>
 
     <footer class="bg-light text-center mt-5 py-3">
         <div class="container">
-            <p class="mb-0 text-muted">&copy; {{ current_year|default:"2025" }} ShopStack E-commerce Dashboard. All rights reserved.</p>
+            <p class="mb-0 text-muted">&copy; {{ current_year|default:"2025" }} ShopStack E-commerce Dashboard. All
+                rights reserved.</p>
         </div>
     </footer>
 
@@ -113,4 +120,5 @@
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
     <script src="{% static 'js/main.js' %}"></script>
 </body>
+
 </html>
